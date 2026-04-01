@@ -17,6 +17,9 @@ active = df[df['current_status'] == 'Hospitalized'].shape[0]
 total = df.shape[0]
 death = df[df['current_status'] == 'Deceased'].shape[0]
 recover = df[df['current_status'] == 'Recovered'].shape[0]
+mortality_rate = round((death / total) * 100, 2)
+recovery_rate = round((recover / total) * 100, 2)
+
 
 options = [
     {'label': 'All', 'value': 'All'},
@@ -33,29 +36,88 @@ app.layout=html.Div([
                 html.Div([
                     html.H3('Total cases'),
                     html.H4(total)
-                ],className='card-body')
-            ],className='card bg-danger')
-        ],className="col-md-3"),
-        html.Div([html.Div([
+                ], className='card-body')
+            ], className='card bg-danger')
+        ], className="col-md-2"),
+
+        html.Div([
+            html.Div([
                 html.Div([
                     html.H3('Active cases'),
                     html.H4(active)
-                ],className='card-body')
-            ],className='card bg-info')], className="col-md-3"),
-        html.Div([html.Div([
+                ], className='card-body')
+            ], className='card bg-info')
+        ], className="col-md-2"),
+
+        html.Div([
+            html.Div([
                 html.Div([
                     html.H3('Recovered'),
                     html.H4(recover)
-                ],className='card-body')
-            ],className='card bg-warning')], className="col-md-3"),
-        html.Div([html.Div([
+                ], className='card-body')
+            ], className='card bg-warning')
+        ], className="col-md-2"),
+
+        html.Div([
+            html.Div([
                 html.Div([
                     html.H3('Deaths'),
                     html.H4(death)
-                ],className='card-body')
-            ],className='card bg-success')], className="col-md-3")
+                ], className='card-body')
+            ], className='card bg-success')
+        ], className="col-md-2"),
+
+        html.Div([
+            html.Div([
+                html.Div([
+                    html.H3('Recovery Rate'),
+                    html.H4(f"{recovery_rate}%")
+                ], className='card-body')
+            ], className='card bg-success')
+        ], className="col-md-2"),
+
+        html.Div([
+            html.Div([
+                html.Div([
+                    html.H3('Mortality Rate'),
+                    html.H4(f"{mortality_rate}%")
+                ], className='card-body')
+            ], className='card bg-danger')
+        ], className="col-md-2"),
     ], className="row"),
-    html.Div([], className="row"),
+    html.Div([  # <-- ADD THIS ROW WRAPPER
+        html.Div([
+            html.Div([
+                html.Div([
+                    dcc.Graph(
+                        figure=go.Figure(
+                            data=[go.Pie(
+                                labels=['Hospitalized', 'Recovered', 'Deceased'],
+                                values=[active, recover, death]
+                            )],
+                            layout=go.Layout(title="Case Distribution")
+                        )
+                    )
+                ], className='card-body')
+            ], className='card')
+        ], className="col-md-6"),
+
+        html.Div([
+            html.Div([
+                html.Div([
+                    dcc.Graph(
+                        figure=go.Figure(
+                            data=[go.Bar(
+                                x=df['detected_state'].value_counts().head(5).index,
+                                y=df['detected_state'].value_counts().head(5).values
+                            )],
+                            layout=go.Layout(title="Top 5 Affected States")
+                        )
+                    )
+                ], className='card-body')
+            ], className='card')
+        ], className="col-md-6")
+    ], className="row"), # <-- THIS FIXES EVERYTHING
     html.Div([
         html.Div([
             html.Div([
